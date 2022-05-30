@@ -9,7 +9,8 @@ shotsLeft        = 60;
 gameOverNumber  = 50;                    
 loopPlay        = false;
 
-function start() {
+// Easy mode button onclick
+function startEasyMode() {
     count           = 0;
     // starts at 6 seconds
     getFaster       = 6000;
@@ -26,10 +27,10 @@ function start() {
     loopPlay    = true;
 
     // Game mechanics
-    function game() {                               
+    function game() {
         let randomTime = Math.round(Math.random() * getFaster);
         // if spawn speed > 0.7 seconds, zombie spawns 10% faster each time
-        getFaster > 700 ? getFaster = (getFaster * 0.9): '';    
+        getFaster > 700 ? getFaster = (getFaster * 0.9): '';
 
         setTimeout(() => {
             if (shotsRemaining === 0) {
@@ -42,6 +43,52 @@ function start() {
                 gameOver();
             }
         }, randomTime);    // random zombie spawn
+    };
+
+    const gameOver = () => {
+        endScreen.innerHTML = `<div class="gameOver">Game Over <br> Score : ${count}</div>`;    // game over screen
+        endScreen.style.visibility = 'visible';
+        endScreen.style.opacity = 1;
+        loopPlay = false;
+    }
+
+    const youWin = () => {
+        let accuracy = Math.round(count / shotsLeft * 100);
+        endScreen.innerHTML = `<div class="youWin">Congratulation !! <br><span>Precision : ${accuracy}%</span></div>`;    // affichage game over
+        endScreen.style.visibility = 'visible';
+        endScreen.style.opacity = 1;
+        loopPlay = false;
+    }
+}
+
+// Hard mode button onclick
+function startHardMode() {
+    count           = 0;
+    getFaster       = 4000;
+    shotsRemaining   = shotsLeft;                     
+
+    canvas.innerHTML    = '';
+    score.innerHTML     = count;                    
+    shots.innerHTML      = shotsRemaining;
+
+    loopPlay ? '' : game();
+    loopPlay    = true;
+
+    function game() {              
+        let randomTime = Math.round(Math.random() * getFaster);
+        // if spawn speed > 0.6 seconds, zombie spawns 40% faster each time
+        getFaster > 600 ? getFaster = (getFaster * 0.6): '';    
+
+        setTimeout(() => {
+            if (shotsRemaining === 0) {
+                youWin();
+            } else if (canvas.childElementCount < gameOverNumber) { 
+                zombiePop();
+                game();    
+            } else {
+                gameOver();
+            }
+        }, randomTime);
     };
 
     const gameOver = () => {
@@ -60,15 +107,13 @@ function start() {
     }
 }
 
-
-// randomly create a zombie
 function zombiePop() {
     let zombie = new Image();    //img src
     zombie.src = "./pictures/zombie.png";
 
     zombie.classList.add('zombie');                          // set class 'zombie' for each zombie that pops
-    zombie.style.top = Math.random() * 500 + 'px';           // random pop on red screen: 500 size height canva
-    zombie.style.left = Math.random() * 500 + 'px';          // random pop on red screen: 500 size width canva
+    zombie.style.top = Math.random() * 400 + 'px';           // random pop on red screen: 400 size height canva
+    zombie.style.left = Math.random() * 350 + 'px';          // random pop on red screen: 300 size width canva
 
     let x, y;
     x = y = (Math.random() * 30) + 40;                       // zombie random size (at min 40px, max 70)
@@ -78,8 +123,8 @@ function zombiePop() {
 
     let plusMinus = Math.random() < 0.5 ? -1 : 1;
 
-    let trX = Math.random() * 500 * plusMinus;
-    let trY = Math.random() * 500 * plusMinus;
+    let trX = Math.random() * 400 * plusMinus;
+    let trY = Math.random() * 350 * plusMinus;
     zombie.style.setProperty('--trX', `${ trX }%`);
     zombie.style.setProperty('--trY', `${ trY }%`);
 
@@ -106,11 +151,14 @@ canvas.addEventListener('click', () => {
     }
 });
 
-// hide screen on click
+/* the game restarts after 0.5 s
+when click on game over or success window
+*/
 endScreen.addEventListener('click', () => {
     setTimeout(() => {
-        start();
+        startEasyMode();
+        startHardMode();
         endScreen.style.opacity = '0';
         endScreen.style.visibility = 'hidden';
-    }, 3500)                                                // the game restarts after 3.5 s
+    }, 500)
 });
